@@ -140,7 +140,18 @@ if uv run was successful and claude failed to load mcp, make sure claude is usin
 ``` 
 to find python, and replace "python" with the path you got. 
 
+### 4 Use Cursor
+Go to Settings > MCP > add new MCP server
+add the same entry in claude_desktop_config.json
+you might need to stop claude and restart houdini and the server
 
+### 5 OPUS integration
+
+OPUS provide a large set of furniture and environmental procedural assets.
+you will need a Rapid API key to log in. Create an account at: [RapidAPI](https://rapidapi.com/)
+Subscribe to OPUS API at: [OPUS API Subscribe](https://rapidapi.com/genel-gi78OM1rB/api/opus5/pricing)
+Get your Rapid API key at [OPUS API](https://rapidapi.com/genel-gi78OM1rB/api/opus5)
+add the key to urls.env
 ### 4 Acknowledgement
 
 Houdini-MCP was built following [blender-mcp](https://github.com/ahujasid/blender-mcp). We thank them for the contribution.
