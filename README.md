@@ -141,15 +141,22 @@ Go to Settings > MCP > add new MCP server
 add the same entry in claude_desktop_config.json
 you might need to stop claude and restart houdini and the server
 
-### OPUS integration
+### OPUS Integration
 
-OPUS provide a large set of furniture and environmental procedural assets.
-you will need a Rapid API key to log in. Create an account at: [RapidAPI](https://rapidapi.com/)
-Subscribe to OPUS API at: [OPUS API Subscribe](https://rapidapi.com/genel-gi78OM1rB/api/opus5/pricing)
-Get your Rapid API key at [OPUS API](https://rapidapi.com/genel-gi78OM1rB/api/opus5)
-add the key to urls.env
+OPUS is a Houdini-based platform that offers a comprehensive collection of procedural assets, specializing in furniture and environmental elements. It streamlines the entire process of parameter adjustments, allowing you to either set the parameters of interest or leave them entirely to the AI. When no parameters are set, the AI takes over and adjusts them in a controlled randomization way, ensuring flexibility while maintaining the desired outcome.
 
-[This short YouTube video](https://youtu.be/-JgJwL6ZHIo) shows what you can achieve with OPUS integration:
+This API enables developers and creators to generate and customize these assets programmatically, making it ideal for applications such as virtual environments, gaming, architectural visualization, and more.
+
+By integrating OPUS through RapidAPI, you can access a wide range of assets that can be tailored to suit your project’s specific requirements. This integration provides enhanced realism, flexibility, and customization within your digital environments.
+
+#### Steps to enable OPUS
+
+1. **Create an Account**: Sign up at [RapidAPI](https://rapidapi.com/).
+2. **Subscribe to OPUS API**: Go to [OPUS API Subscription](https://rapidapi.com/genel-gi78OM1rB/api/opus5/pricing) and subscribe.
+3. **Get Your RapidAPI Key**: After subscribing, obtain your RapidAPI key from [OPUS API](https://rapidapi.com/genel-gi78OM1rB/api/opus5).
+4. **Update `urls.env`**: Add your RapidAPI key to the `urls.env` file.
+
+For a visual guide, check out [this short YouTube video](https://youtu.be/-JgJwL6ZHIo) that demonstrates the possibilities with OPUS integration.
 
 
 ### Acknowledgement
