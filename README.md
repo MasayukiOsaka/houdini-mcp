@@ -11,20 +11,19 @@ Below are the complete instructions for setting up Houdini, uv, Claude Desktop a
 
 ## Table of Contents
 
-1. [Requirements](#requirements)  
-2. [Houdini MCP Plugin Installation](#houdini-mcp-plugin-installation)  
-   1. [Folder Layout](#folder-layout)  
-   2. [Shelf Tool (Optional)](#shelf-tool-optional)  
-   3. [Packages Integration (Optional)](#packages-integration-optional)  
-3. [Installing the `mcp` Python Package](#installing-the-mcp-python-package)  
-   1. [Using uv on Windows](#using-uv-on-windows)  
-   2. [Using pip Directly](#using-pip-directly)  
-4. [Bridging Script and Claude for Desktop](#bridging-script-and-claude-for-desktop)  
-   1. [The Bridging Script](#the-bridging-script)  
-   2. [Telling Claude Desktop to Use Your Script](#telling-claude-desktop-to-use-your-script)  
-5. [Testing & Usage](#testing--usage)  
-6. [Troubleshooting](#troubleshooting)
-
+1. [Requirements](#requirements)
+2. [Houdini MCP Plugin Installation](#houdini-mcp-plugin-installation)
+   1. [Folder Layout](#folder-layout)
+   2. [Shelf Tool (Optional)](#shelf-tool-optional)
+   3. [Packages Integration (Optional)](#packages-integration-optional)
+3. [Installing the `mcp` Python Package](#installing-the-mcp-python-package)
+   1. [Using uv on Windows](#using-uv-on-windows)
+   <!-- (Optionally, you can add a section for using pip directly if needed.) -->
+4. [Bridging Script and Claude/Cursor Integration](#bridging-script-and-claudecursor-integration)
+   1. [Telling Claude Desktop to Use Your Script](#telling-claude-desktop-to-use-your-script)
+   2. [Use Cursor](#use-cursor)
+5. [OPUS Integration](#opus-integration)
+6. [Acknowledgement](#acknowledgement)
 ---
 
 ## Requirements
