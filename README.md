@@ -151,6 +151,7 @@ you will need a Rapid API key to log in. Create an account at: [RapidAPI](https:
 Subscribe to OPUS API at: [OPUS API Subscribe](https://rapidapi.com/genel-gi78OM1rB/api/opus5/pricing)
 Get your Rapid API key at [OPUS API](https://rapidapi.com/genel-gi78OM1rB/api/opus5)
 add the key to urls.env
-### 4 Acknowledgement
+
+### Acknowledgement
 
 Houdini-MCP was built following [blender-mcp](https://github.com/ahujasid/blender-mcp). We thank them for the contribution.
