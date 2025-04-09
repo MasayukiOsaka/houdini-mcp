@@ -149,7 +149,8 @@ Subscribe to OPUS API at: [OPUS API Subscribe](https://rapidapi.com/genel-gi78OM
 Get your Rapid API key at [OPUS API](https://rapidapi.com/genel-gi78OM1rB/api/opus5)
 add the key to urls.env
 
-https://youtu.be/-JgJwL6ZHIo
+[This short YouTube video](https://youtu.be/-JgJwL6ZHIo) shows what you can achieve with OPUS integration:
+
 
 ### Acknowledgement
 
