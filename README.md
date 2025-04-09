@@ -34,9 +34,9 @@ Below are the complete instructions for setting up Houdini, uv, Claude Desktop a
 
 ---
 
-## 1. Houdini MCP Plugin Installation
+## Houdini MCP Plugin Installation
 
-### 1.1 Folder Layout
+### Folder Layout
 
 Create a folder in your Houdini scripts directory:
 C:/Users/YourUserName/Documents/houdini19.5/scripts/python/houdinimcp/
@@ -51,7 +51,7 @@ Inside **`houdinimcp/`**, place:
 
 *(If you prefer, `houdini_mcp_server.py` can live elsewhere. As long as you know its path for running with `uv`.)*
 
-### 1.2 Shelf Tool 
+### Shelf Tool 
 
 create a **Shelf Tool** to toggle the server in Houdini:
 
@@ -81,7 +81,7 @@ Label: "MCP"
 ```
 
 
-### 1.3 Packages Integration 
+### Packages Integration 
 
 If you want Houdini to auto-load your plugin at startup, create a package file named houdinimcp.json in the Houdini packages folder (e.g. C:/Users/YourUserName/Documents/houdini19.5/packages/):
 ```json
@@ -97,7 +97,7 @@ If you want Houdini to auto-load your plugin at startup, create a package file n
 }
 ```
 
-### 2 Using uv on Windows
+### Using uv on Windows
 ```powershell
   # 1) Install uv 
   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
@@ -112,7 +112,7 @@ If you want Houdini to auto-load your plugin at startup, create a package file n
   # 4) Verify
   uv run python -c "import mcp.server.fastmcp; print('MCP is installed!')"
 ```
-### 3 Telling Claude for Desktop to Use Your Script
+### Telling Claude for Desktop to Use Your Script
 Go to File > Settings > Developer > Edit Config > 
 Open or create:
 claude_desktop_config.json
@@ -139,12 +139,12 @@ if uv run was successful and claude failed to load mcp, make sure claude is usin
 ``` 
 to find python, and replace "python" with the path you got. 
 
-### 4 Use Cursor
+### Use Cursor
 Go to Settings > MCP > add new MCP server
 add the same entry in claude_desktop_config.json
 you might need to stop claude and restart houdini and the server
 
-### 5 OPUS integration
+### OPUS integration
 
 OPUS provide a large set of furniture and environmental procedural assets.
 you will need a Rapid API key to log in. Create an account at: [RapidAPI](https://rapidapi.com/)
