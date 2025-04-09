@@ -48,7 +48,7 @@ Inside **`houdinimcp/`**, place:
 
 *(If you prefer, `houdini_mcp_server.py` can live elsewhere. As long as you know its path for running with `uv`.)*
 
-### Shelf Tool 
+### Shelf Tool
 
 create a **Shelf Tool** to toggle the server in Houdini:
 
@@ -78,7 +78,7 @@ Label: "MCP"
 ```
 
 
-### Packages Integration 
+### Packages Integration
 
 If you want Houdini to auto-load your plugin at startup, create a package file named houdinimcp.json in the Houdini packages folder (e.g. C:/Users/YourUserName/Documents/houdini19.5/packages/):
 ```json
