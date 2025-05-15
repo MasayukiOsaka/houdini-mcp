@@ -644,6 +644,90 @@ def execute_houdini_code(ctx: Context, code: str) -> str:
         return f"Server Error executing code: {str(e)}"
 
 # -------------------------------------------------------------------
+# NEW rendering Tools
+# -------------------------------------------------------------------
+@mcp.tool()
+def render_single_view(ctx: Context,
+                       orthographic: bool = False,
+                       rotation: List[float] = [0, 90, 0],
+                       render_path: str = "C:/temp/",
+                       render_engine: str = "opengl",
+                       karma_engine: str = "cpu") -> str:
+    """
+    Render a single view inside Houdini and return the rendered image path.
+    """
+    try:
+        conn = get_houdini_connection()
+        response = conn.send_command("render_single_view", {
+            "orthographic": orthographic,
+            "rotation": rotation,
+            "render_path": render_path,
+            "render_engine": render_engine,
+            "karma_engine": karma_engine,
+        })
+
+        if response.get("status") == "error":
+            origin = response.get("origin", "houdini")
+            return f"Error ({origin}): {response.get('message', 'Unknown error')}"
+
+        return response.get("result", "Render completed but no output path returned.")
+    except Exception as e:
+        logger.error(f"render_single_view failed: {e}", exc_info=True)
+        return f"Render failed: {str(e)}"
+
+@mcp.tool()
+def render_quad_views(ctx: Context,
+                      render_path: str = "C:/temp/",
+                      render_engine: str = "opengl",
+                      karma_engine: str = "cpu") -> str:
+    """
+    Render 4 canonical views from Houdini and return the image paths.
+    """
+    try:
+        conn = get_houdini_connection()
+        response = conn.send_command("render_quad_view", {
+            "render_path": render_path,
+            "render_engine": render_engine,
+            "karma_engine": karma_engine,
+        })
+
+        if response.get("status") == "error":
+            origin = response.get("origin", "houdini")
+            return f"Error ({origin}): {response.get('message', 'Unknown error')}"
+
+        return response.get("result", "Render completed but no output returned.")
+    except Exception as e:
+        logger.error(f"render_quad_views failed: {e}", exc_info=True)
+        return f"Render failed: {str(e)}"
+
+@mcp.tool()
+def render_specific_camera(ctx: Context,
+                           camera_path: str,
+                           render_path: str = "C:/temp/",
+                           render_engine: str = "opengl",
+                           karma_engine: str = "cpu") -> str:
+    """
+    Render from a specific camera path in the Houdini scene.
+    """
+    try:
+        conn = get_houdini_connection()
+        response = conn.send_command("render_specific_camera", {
+            "camera_path": camera_path,
+            "render_path": render_path,
+            "render_engine": render_engine,
+            "karma_engine": karma_engine,
+        })
+
+        if response.get("status") == "error":
+            origin = response.get("origin", "houdini")
+            return f"Error ({origin}): {response.get('message', 'Unknown error')}"
+
+        return response.get("result", "Render completed but no output path returned.")
+    except Exception as e:
+        logger.error(f"render_specific_camera failed: {e}", exc_info=True)
+        return f"Render failed: {str(e)}"
+
+# -------------------------------------------------------------------
 # NEW OPUS API Tools
 # -------------------------------------------------------------------
 

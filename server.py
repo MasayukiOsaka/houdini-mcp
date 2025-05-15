@@ -12,11 +12,22 @@ import sys
 from PySide2 import QtWidgets, QtCore
 import io
 from contextlib import redirect_stdout, redirect_stderr
+import base64 # Added for encoding
 
 # Imports for OPUS import
 import zipfile
 from urllib.parse import urlparse
-import uuid # For unique temp dirs
+import uuid # For unique temp dirs and file processing
+
+# --- NEW: Import render functions --- 
+# try:
+from .HoudiniMCPRender import *
+# HMCPLib = HoudiniMCPRender # Alias for easier use
+print("HoudiniMCPRender module loaded successfully.")
+# except ImportError:
+#     HMCPLib = None
+#     print("Warning: HoudiniMCPRender.py not found or failed to import. Rendering tools will be unavailable.")
+# ----------------------------------
 
 # Info about the extension (optional metadata)
 EXTENSION_NAME = "Houdini MCP"
@@ -154,6 +165,10 @@ class HoudiniMCPServer:
             "set_material": self.set_material,
             "get_asset_lib_status": self.get_asset_lib_status,
             "import_opus_url": self.handle_import_opus_url,
+            # Add new render handlers
+            "render_single_view": self.handle_render_single_view,
+            "render_quad_view": self.handle_render_quad_view,
+            "render_specific_camera": self.handle_render_specific_camera,
         }
         
         # If user has toggled asset library usage
@@ -640,6 +655,172 @@ class HoudiniMCPServer:
             #         print(f"Cleaned up temporary directory: {temp_dir}")
             #     except Exception as cleanup_e:
             #         print(f"Warning: Failed to clean up temporary directory {temp_dir}: {cleanup_e}")
+
+    # -------------------------------------------------------------------------
+    # NEW Render Command Handlers (using HoudiniMCPRender.py)
+    # -------------------------------------------------------------------------
+    # def _check_render_lib(self):
+    #     """Helper to check if the render library was imported."""
+    #     if HMCPLib is None:
+    #         raise RuntimeError("HoudiniMCPRender library not available. Cannot execute render commands.")
+
+    def _process_rendered_image(self, filepath, camera_path=None, view_name=None):
+        """
+        Helper to read, encode, get metadata, and clean up a rendered image file.
+        Returns a dictionary compatible with the expected tool output.
+        """
+        if not filepath or not os.path.exists(filepath):
+            return {"status": "error", "message": f"Rendered file not found: {filepath}", "origin": "_process_rendered_image"}
+        
+
+        # Determine format from extension
+        _, ext = os.path.splitext(filepath)
+        format = ext[1:].lower() if ext else 'unknown'
+
+        # Get resolution from the camera if possible
+        resolution = [0, 0]
+        if camera_path:
+                cam_node = hou.node(camera_path)
+                if cam_node and cam_node.parm("resx") and cam_node.parm("resy"):
+                    resolution = [cam_node.parm("resx").eval(), cam_node.parm("resy").eval()]
+                else: # Fallback for camera not found or no res parms
+                    print(f"Warning: Could not get resolution from camera {camera_path}")
+                    # Could try to get from image header, but complex. Returning 0,0
+                    pass
+        
+        # Read file and encode
+        with open(filepath, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        result_data = {
+            "status": "success",
+            "format": format,
+            "resolution": resolution, 
+            "image_base64": encoded_string,
+            "filepath_on_server": filepath # For debugging, maybe remove later
+        }
+        if view_name:
+                result_data["view_name"] = view_name
+                
+        return result_data
+
+        # except Exception as e:
+        #     error_message = f"Failed to process rendered image {filepath}: {str(e)}"
+        #     print(error_message)
+        #     traceback.print_exc()
+        #     return {"status": "error", "message": error_message, "origin": "_process_rendered_image"}
+        # finally:
+        #     # Clean up the temporary file
+        #     if os.path.exists(filepath):
+        #         try:
+        #             os.remove(filepath)
+        #             print(f"Cleaned up temporary render file: {filepath}")
+        #         except Exception as cleanup_e:
+        #             print(f"Warning: Failed to clean up temporary render file {filepath}: {cleanup_e}")
+
+    def handle_render_single_view(self, orthographic=False, rotation=(0, 90, 0), render_path=None, render_engine="opengl", karma_engine="cpu"):
+        """Handles the 'render_single_view' command."""
+        # self._check_render_lib()
+        
+        # Use a temporary directory for the render output
+        if not render_path:
+            render_path = tempfile.gettempdir()
+            
+        try:
+            # Ensure rotation is a tuple
+            if isinstance(rotation, list): rotation = tuple(rotation)
+            
+            print(f"Calling HoudiniMCPRender.render_single_view with rotation={rotation}, ortho={orthographic}, engine={render_engine}...")
+            filepath = render_single_view(
+                orthographic=orthographic,
+                rotation=rotation,
+                render_path=render_path,
+                render_engine=render_engine,
+                karma_engine=karma_engine
+            )
+            print(f"render_single_view returned filepath: {filepath}")
+
+            # Process the result
+            # Determine camera path used (it's always /obj/MCP_CAMERA for this func)
+            camera_path = "/obj/MCP_CAMERA"
+            return self._process_rendered_image(filepath, camera_path)
+
+        except Exception as e:
+            error_message = f"Render Single View Failed: {str(e)}"
+            print(error_message)
+            traceback.print_exc()
+            return {"status": "error", "message": error_message, "origin": "handle_render_single_view"}
+
+    def handle_render_quad_view(self, orthographic=True, render_path=None, render_engine="opengl", karma_engine="cpu"):
+        """Handles the 'render_quad_view' command."""
+        # self._check_render_lib()
+        
+        if not render_path:
+            render_path = tempfile.gettempdir()
+
+        try:
+            print(f"Calling HoudiniMCPRender.render_quad_view with ortho={orthographic}, engine={render_engine}...")
+            filepaths = render_quad_view(
+                orthographic=orthographic,
+                render_path=render_path,
+                render_engine=render_engine,
+                karma_engine=karma_engine
+            )
+            print(f"render_quad_view returned filepaths: {filepaths}")
+
+            # Process each resulting file
+            results = []
+            camera_path = "/obj/MCP_CAMERA" # Same camera is reused and modified
+            for fp in filepaths:
+                # Extract view name from filename if possible (e.g., MCP_OGL_RENDER_front_ortho.jpg -> front)
+                view_name = None
+                try:
+                     filename = os.path.basename(fp)
+                     parts = filename.split('_')
+                     if len(parts) > 2: # Look for the part after engine/render type
+                         view_name = parts[2] 
+                except:
+                     pass # Ignore errors extracting view name
+                     
+                results.append(self._process_rendered_image(fp, camera_path, view_name))
+                
+            # Return the list of results
+            return {"status": "success", "results": results}
+
+        except Exception as e:
+            error_message = f"Render Quad View Failed: {str(e)}"
+            print(error_message)
+            traceback.print_exc()
+            return {"status": "error", "message": error_message, "origin": "handle_render_quad_view"}
+
+    def handle_render_specific_camera(self, camera_path, render_path=None, render_engine="opengl", karma_engine="cpu"):
+        """Handles the 'render_specific_camera' command."""
+        # self._check_render_lib()
+        
+        if not render_path:
+            render_path = tempfile.gettempdir()
+            
+        if not camera_path or not hou.node(camera_path):
+             return {"status": "error", "message": f"Camera path '{camera_path}' is invalid or node not found.", "origin": "handle_render_specific_camera"}
+
+        try:
+            print(f"Calling HoudiniMCPRender.render_specific_camera for camera={camera_path}, engine={render_engine}...")
+            filepath = render_specific_camera(
+                camera_path=camera_path,
+                render_path=render_path,
+                render_engine=render_engine,
+                karma_engine=karma_engine
+            )
+            print(f"render_specific_camera returned filepath: {filepath}")
+
+            # Process the result, using the provided camera_path
+            return self._process_rendered_image(filepath, camera_path)
+
+        except Exception as e:
+            error_message = f"Render Specific Camera Failed: {str(e)}"
+            print(error_message)
+            traceback.print_exc()
+            return {"status": "error", "message": error_message, "origin": "handle_render_specific_camera"}
 
     # -------------------------------------------------------------------------
     # Existing Placeholder asset library methods
