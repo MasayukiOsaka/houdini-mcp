@@ -4,11 +4,12 @@ houdini_mcp_server.py
 
 This is the "bridge" or "driver" script that Claude will run via `uv run`.
 It uses the MCP library (fastmcp) to communicate with Claude over stdio,
-and relays each command to the local Houdini plugin on port 9876.
+and relays each command to the local Houdini plugin on a configurable port.
 """
 import sys
 import os
 import site
+import argparse
 
 # Get the directory where the script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -442,7 +443,7 @@ class HoudiniConnection:
         """
         if not self.connect():
             # Instead of raising, return an error dict consistent with API errors
-            error_msg = "Could not connect to Houdini on port 9876."
+            error_msg = f"Could not connect to Houdini on port {self.port}."
             logger.error(error_msg)
             # Return structure similar to API failures
             return {"status": "error", "message": error_msg, "origin": "mcp_server_connection"}
@@ -513,19 +514,20 @@ class HoudiniConnection:
 
 # A global Houdini connection object
 _houdini_connection: HoudiniConnection = None
+_houdini_port: int = 9876  # Default port
 
 def get_houdini_connection() -> HoudiniConnection:
     """Get or create a persistent HoudiniConnection object."""
-    global _houdini_connection
+    global _houdini_connection, _houdini_port
     if _houdini_connection is None:
-        logger.info("Creating new HoudiniConnection.")
-        _houdini_connection = HoudiniConnection(host="localhost", port=9876)
+        logger.info(f"Creating new HoudiniConnection on port {_houdini_port}.")
+        _houdini_connection = HoudiniConnection(host="localhost", port=_houdini_port)
 
     # Always try to connect, returns True if already connected or successful now
     if not _houdini_connection.connect():
          # Connection failed, reset _houdini_connection to allow retry next time?
          _houdini_connection = None
-         raise ConnectionError("Could not connect to Houdini on localhost:9876. Is the plugin running?")
+         raise ConnectionError(f"Could not connect to Houdini on localhost:{_houdini_port}. Is the plugin running?")
          
     return _houdini_connection
 
@@ -889,11 +891,23 @@ def get_opus_job_result(batch_job_id: str) -> dict:
 
 def main():
     """Run the MCP server on stdio."""
+    global _houdini_port
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Houdini MCP Server Bridge')
+    parser.add_argument('--port', type=int, default=9876,
+                        help='Port to connect to Houdini (default: 9876)')
+    args = parser.parse_args()
+    
+    # Set the global port variable
+    _houdini_port = args.port
+    logger.info(f"Configured to connect to Houdini on port {_houdini_port}")
+    
     # Check necessary RapidAPI variables are set before running
     if not RAPIDAPI_HOST_URL or not RAPIDAPI_HOST or not RAPIDAPI_KEY:
-         logger.critical("RAPIDAPI_HOST_URL, RAPIDAPI_HOST, and RAPIDAPI_KEY environment variables are not set. Please configure urls.env.")
-         logger.critical("Server will not start.")
-         sys.exit(1) # Exit if critical configuration is missing
+        logger.critical("RAPIDAPI_HOST_URL, RAPIDAPI_HOST, and RAPIDAPI_KEY environment variables are not set. Please configure urls.env.")
+        logger.critical("Server will not start.")
+        sys.exit(1) # Exit if critical configuration is missing
          
     logger.info(f"Using RapidAPI Host URL: {RAPIDAPI_HOST_URL}")
     logger.info(f"Using RapidAPI Host Header: {RAPIDAPI_HOST}")

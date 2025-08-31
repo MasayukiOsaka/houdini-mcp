@@ -72,12 +72,14 @@ Label: "MCP"
    import hou
    import houdinimcp
 
+    _PORT = 9876
+
    if hasattr(hou.session, "houdinimcp_server") and hou.session.houdinimcp_server:
        houdinimcp.stop_server()
        hou.ui.displayMessage("Houdini MCP Server stopped")
    else:
-       houdinimcp.start_server()
-       hou.ui.displayMessage("Houdini MCP Server started on localhost:9876")
+       houdinimcp.start_server(_PORT)
+       hou.ui.displayMessage(f"Houdini MCP Server started on localhost:{_PORT}")
 
 ```
 
@@ -128,12 +130,17 @@ Add an entry:
       "args": [
         "run",
         "python",
-        "C:/Users/<YourUserName>/Documents/houdini19.5/scripts/python/houdinimcp/houdini_mcp_server.py"
+        "C:/Users/<YourUserName>/Documents/houdini19.5/scripts/python/houdinimcp/houdini_mcp_server.py",
+        "--port",
+        "9876"
       ]
     }
   }
 }
 ```
+Note: The port number must match between the shelf tool and Claude Desktop configuration. 
+If you change it in one place, make sure to update it in the other.
+
 if uv run was successful and claude failed to load mcp, make sure claude is using the same python version, use:
 ```cmd
   python -c "import sys; print(sys.executable)"
@@ -152,6 +159,7 @@ you will need a Rapid API key to log in. Create an account at: [RapidAPI](https:
 Subscribe to OPUS API at: [OPUS API Subscribe](https://rapidapi.com/genel-gi78OM1rB/api/opus5/pricing)
 Get your Rapid API key at [OPUS API](https://rapidapi.com/genel-gi78OM1rB/api/opus5)
 add the key to urls.env
-### 4 Acknowledgement
+
+### 6 Acknowledgement
 
 Houdini-MCP was built following [blender-mcp](https://github.com/ahujasid/blender-mcp). We thank them for the contribution.
